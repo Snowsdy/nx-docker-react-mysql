@@ -19,6 +19,12 @@
           "buildTarget": "backend-express:build:production"
         }
       }
+    },
+    "docker-build": {
+      "dependsOn": [
+        "build"
+      ],
+      "command": "docker build -f apps/backend-express/backend.Dockerfile . -t backend-express"
     }
   }
 }

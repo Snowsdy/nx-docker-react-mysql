@@ -4,20 +4,39 @@
  */
 
 import express from 'express';
-import * as path from 'path';
-import { addTodoRoutes } from './todos';
+import mysql from 'mysql2';
+import todoRouter from './todo.controller';
+import cors from 'cors';
 
 const app = express();
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use(cors());
 
-app.get('/api', (req, res) => {
-  res.send({ message: 'Welcome to backend-express!' });
+// Middleware
+app.use(express.json());
+
+// Database Connection
+const db = mysql.createConnection({
+  host: process.env.DB_HOST ?? 'localhost',
+  user: process.env.DB_USER ?? 'root',
+  password: process.env.DB_PASSWORD ?? 'password',
+  database: process.env.DB_NAME ?? 'todo_db',
 });
 
-addTodoRoutes(app);
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+  } else {
+    console.log('Connected to the database.');
+  }
+});
 
-const port = process.env.PORT || 3333;
+app.set('db', db);
+
+// Routes
+app.use('/api/todos', todoRouter);
+
+const port = process.env.BACKEND_PORT || 3333;
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 });
